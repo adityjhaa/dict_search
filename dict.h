@@ -6,30 +6,31 @@
 using namespace std;
 
 
-class word_instance{
-public:
-    vector<int> book_id;
-    vector<int> page_no;
-    vector<int> paragraph_no;
-    vector<int> sent_no;
-    vector<int> offset;
-    word_instance(){
-
-    }
-
-    void add_instance(int b, int pg, int pgh, int snt, int pos){
-        book_id.push_back(b);
-        page_no.push_back(pg);
-        paragraph_no.push_back(pgh);
-        sent_no.push_back(snt);
-        offset.push_back(pos);
-    }
-};
-
-
 class Dict{
 private:
     // You can add attributes/helper functions here
+
+    
+    class word_instance{
+    public:
+        vector<int> book_id;
+        vector<int> page_no;
+        vector<int> paragraph_no;
+        vector<int> sent_no;
+        vector<int> offset;
+        word_instance(){
+
+        }
+
+        void add_instance(int b, int pg, int pgh, int snt, int pos){
+            book_id.push_back(b);
+            page_no.push_back(pg);
+            paragraph_no.push_back(pgh);
+            sent_no.push_back(snt);
+            offset.push_back(pos);
+        }
+    };
+
     vector<vector<pair<string,word_instance>>>words_HashTable;
     vector<string> working;
 public: 
