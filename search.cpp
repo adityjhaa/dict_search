@@ -1,20 +1,47 @@
 // Do NOT add any other includes
-#include "search.h"
+#include <string>
+#include <vector>
+#include <iostream>
+#include "Node.h"
+using namespace std;
 
-SearchEngine::SearchEngine(){
-    // Implement your function here  
-}
+class SearchEngine
+{
+private:
+    // You can add attributes/helper functions here
+    class sent
+    {
+    public:
+        string s;
+        int length;
+        int book_code, page, paragraph, sentence_no;
+        sent() {}
+        sent(string s, int book_code, int page, int paragraph, int sentence_no)
+        {
+            this->book_code = book_code;
+            this->s = s;
+            this->page = page;
+            this->paragraph = paragraph;
+            this->sentence_no = sentence_no;
+            length = s.size();
+        }
+    };
 
-SearchEngine::~SearchEngine(){
-    // Implement your function here  
-}
+    sent *sd;
+    int curr_size;
+    int tot_size;
 
-void SearchEngine::insert_sentence(int book_code, int page, int paragraph, int sentence_no, string sentence){
-    // Implement your function here  
-    return;
-}
+public:
+    /* Please do not touch the attributes and
+    functions within the guard lines placed below  */
+    /* ------------------------------------------- */
+    SearchEngine();
 
-Node* SearchEngine::search(string pattern, int& n_matches){
-    // Implement your function here  
-    return nullptr;
-}
+    ~SearchEngine();
+
+    void insert_sentence(int book_code, int page, int paragraph, int sentence_no, string sentence);
+
+    Node *search(string pattern, int &n_matches);
+
+    /* -----------------------------------------*/
+};
