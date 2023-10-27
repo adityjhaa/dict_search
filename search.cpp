@@ -1,47 +1,182 @@
 // Do NOT add any other includes
-#include <string>
-#include <vector>
-#include <iostream>
-#include "Node.h"
-using namespace std;
+#include "search.h"
 
-class SearchEngine
+vector<int> computeLPSArray(string pat, int M, vector<int> lps)
 {
-private:
-    // You can add attributes/helper functions here
-    class sent
+    int len = 0;
+
+    lps[0] = 0;
+
+    int i = 1;
+    while (i < M)
     {
-    public:
-        string s;
-        int length;
-        int book_code, page, paragraph, sentence_no;
-        sent() {}
-        sent(string s, int book_code, int page, int paragraph, int sentence_no)
+        if (pat[i] == pat[len])
         {
-            this->book_code = book_code;
-            this->s = s;
-            this->page = page;
-            this->paragraph = paragraph;
-            this->sentence_no = sentence_no;
-            length = s.size();
+            len++;
+            lps[i] = len;
+            i++;
         }
-    };
+        else
+        {
+            if (len != 0)
+            {
+                len = lps[len - 1];
+            }
+            else
+            {
+                lps[i] = 0;
+                i++;
+            }
+        }
+    }
 
-    sent *sd;
-    int curr_size;
-    int tot_size;
+    return lps;
+}
 
-public:
-    /* Please do not touch the attributes and
-    functions within the guard lines placed below  */
-    /* ------------------------------------------- */
-    SearchEngine();
+vector<int> KMPSearch(string pat, string txt)
+{
+    vector<int> offset;
 
-    ~SearchEngine();
+    int M = pat.size();
+    int N = txt.size();
 
-    void insert_sentence(int book_code, int page, int paragraph, int sentence_no, string sentence);
+    vector<int> lps(M);
 
-    Node *search(string pattern, int &n_matches);
+    lps = computeLPSArray(pat, M, lps);
 
-    /* -----------------------------------------*/
-};
+    int i = 0;
+    int j = 0;
+
+    while ((N - i) >= (M - j))
+    {
+        if (pat[j] == txt[i])
+        {
+            j++;
+            i++;
+        }
+
+        if (j == M)
+        {
+
+            offset.push_back(i - j);
+            j = lps[j - 1];
+        }
+
+        else if (i < N and pat[j] != txt[i])
+        {
+            if (j != 0)
+            {
+                j = lps[j - 1];
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+    return offset;
+}
+
+char to_lower(char c)
+{
+    return c - 'A' + 'a';
+}
+
+SearchEngine::SearchEngine()
+{
+    sd = new sent[4];
+    tot_size = 2;
+    curr_size = 0;
+}
+
+SearchEngine::~SearchEngine()
+{
+    delete[] sd;
+}
+
+void SearchEngine::insert_sentence(int book_code, int page, int paragraph, int sentence_no, string sentence)
+{
+    // Implement your function here
+    for (int i = 0; i < sentence.size(); i++)
+    {
+        if (sentence[i] >= 'A' and sentence[i] <= 'Z')
+        {
+            sentence[i] = to_lower(sentence[i]);
+        }
+    }
+
+    if (curr_size >= tot_size - 1)
+    {
+        tot_size *= 2;
+        sent *temp = new sent[tot_size];
+
+        for (int i = 0; i < curr_size; i++)
+        {
+            sent t_sent = sd[i];
+            temp[i] = t_sent;
+        }
+
+        delete[] sd;
+
+        sd = temp;
+    }
+
+    sent curr(sentence, book_code, page, paragraph, sentence_no);
+    sd[curr_size] = curr;
+    curr_size++;
+    return;
+}
+
+Node *SearchEngine::search(string pattern, int &n_matches) // check for memory leaks
+{
+    // Implement your function here
+    Node *head = NULL;
+
+    for (int i = 0; i < pattern.size(); i++)
+    {
+        if (pattern[i] >= 'A' and pattern[i] <= 'Z')
+        {
+            pattern[i] = to_lower(pattern[i]);
+        }
+    }
+    int a = pattern.size();
+
+    for (int i = 0; i < curr_size; i++)
+    {
+        int b = sd[i].length;
+        string curr_sen = sd[i].s;
+        if (a > b)
+        {
+            continue;
+        }
+        else
+        {
+            vector<int> offsets = KMPSearch(pattern, curr_sen);
+            if (offsets.size() == 0)
+            {
+                // pattern does not match
+                continue;
+            }
+            else
+            {
+                // pattern matches
+                for (int j = 0; j < offsets.size(); j++)
+                {
+                    Node *curr = new Node(sd[i].book_code, sd[i].page, sd[i].paragraph, sd[i].sentence_no, offsets[j]);
+                    if (head == NULL)
+                    {
+                        head = curr;
+                    }
+                    else
+                    {
+                        curr->right = head;
+                        head->left = curr;
+                        head = curr;
+                    }
+                    n_matches++;
+                }
+            }
+        }
+    }
+    return head;
+}
